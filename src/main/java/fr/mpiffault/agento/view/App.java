@@ -9,7 +9,7 @@ public class App {
 	public static void main(String[] args) {
 		System.setProperty("sun.java2d.opengl", "True");
 		
-		JFrame frame = new JFrame("Gravity");
+		JFrame frame = new JFrame("AgentO");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		Environment e = new Environment();
