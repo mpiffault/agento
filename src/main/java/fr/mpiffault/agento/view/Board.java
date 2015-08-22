@@ -9,7 +9,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Line2D;
 
 public class Board extends JPanel implements Runnable {
 
@@ -61,18 +60,9 @@ public class Board extends JPanel implements Runnable {
     }
 
     public void drawAgents(Graphics2D g2) {
-        for (Agent agent : environment.getAgentList()) {
-            drawAgent(agent, g2);
+        for (Drawable drawable : environment.getAgentList()) {
+            drawable.draw(g2);
         }
-    }
-
-    private void drawAgent(Agent agent, Graphics2D g2) {
-        g2.setColor(Color.RED);
-        Line2D.Double line = new Line2D.Double(agent.getPosition().getX() % sizeX,
-                agent.getPosition().getY() % sizeY,
-                agent.getPosition().getX() % sizeX + (agent.getDirection().getVector().getDx() * 5),
-                agent.getPosition().getY() % sizeY + (agent.getDirection().getVector().getDy() * 5));
-        g2.draw(line);
     }
 
     public void drawGradient(Graphics2D g2) {
