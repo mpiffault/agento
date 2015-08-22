@@ -11,30 +11,30 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 
-public class Plateau extends JPanel implements Runnable {
+public class Board extends JPanel implements Runnable {
 
     private static final long serialVersionUID = -8954030686627371948L;
-    public static long RESOLUTION = 30l;
+    public static long TIME_RESOLUTION = 30l;
     private final Environment environment;
     @Getter
     private int sizeX;
     @Getter
     private int sizeY;
 
-    Plateau(final Environment environment) {
+    Board(final Environment environment) {
         super();
         setBackground(Color.WHITE);
         this.environment = environment;
         this.sizeX = (int) this.environment.getSizeX();
         this.sizeY = (int) this.environment.getSizeY();
 
-        Souris s = new Souris();
+        Mouse s = new Mouse();
         this.addMouseListener(s);
 		this.addMouseMotionListener(s);
 
     }
 
-    private class Souris extends MouseAdapter {
+    private class Mouse extends MouseAdapter {
         Agent c;
 
         @Override
@@ -61,7 +61,7 @@ public class Plateau extends JPanel implements Runnable {
     }
 
     public void drawAgents(Graphics2D g2) {
-        for (Agent agent : environment.getListeAgents()) {
+        for (Agent agent : environment.getAgentList()) {
             drawAgent(agent, g2);
         }
     }
@@ -87,14 +87,15 @@ public class Plateau extends JPanel implements Runnable {
     }
 
     /**
-     * Retourne une couleur selon une intensité comprise entre 0(NOIR) et 1785(BLANC)
-     * @param intensiteAsDouble
-     * @param maxValue
-     * @return
+     * Return a color according to intensity given between 0(BLACK) et 1785(WHITE) and a max value
+     * The color gradient sequence is Black=>Blue=>Cyan=>Green=>Yellow=>Red=>Pink=>White
+     * @param intensityAsDouble intensity. a negative value will return BLACK
+     * @param maxValue value beyond which it will be WHITE
+     * @return A Color between BLACK (0) and WHITE (maxValue)
      */
-    public Color intensiteToColor(double intensiteAsDouble, double maxValue) {
-        intensiteAsDouble = (intensiteAsDouble / maxValue) * 1785;
-        int intensite = (int) intensiteAsDouble;
+    public Color intensiteToColor(double intensityAsDouble, double maxValue) {
+        intensityAsDouble = (intensityAsDouble / maxValue) * 1785;
+        int intensite = (int) intensityAsDouble;
         if (intensite >= 1785) return Color.WHITE;
         if (intensite <= 0) return Color.BLACK;
         if (intensite < 255)
@@ -118,7 +119,7 @@ public class Plateau extends JPanel implements Runnable {
     public void run() {
         while(true) {
             try {
-                Thread.sleep(RESOLUTION);
+                Thread.sleep(TIME_RESOLUTION);
                 environment.tick();
                 this.repaint();
             } catch (Exception e) {

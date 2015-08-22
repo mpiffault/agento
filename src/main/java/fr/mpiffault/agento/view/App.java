@@ -16,12 +16,12 @@ public class App {
 		Agent a = new Agent(e);
 		
 		
-		Plateau plateau = new Plateau(e);
+		Board board = new Board(e);
 		
-		Thread t = new Thread(plateau);
+		Thread t = new Thread(board);
 		
-		frame.add(plateau);
-		frame.setSize(plateau.getSizeX() + 1, plateau.getSizeY() + 38);
+		frame.add(board);
+		frame.setSize(board.getSizeX() + 1, board.getSizeY() + 38);
 		frame.setVisible(true);
 		
 		t.start();

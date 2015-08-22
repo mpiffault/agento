@@ -1,6 +1,6 @@
 package fr.mpiffault.agento.model;
 
-import fr.mpiffault.agento.view.Plateau;
+import fr.mpiffault.agento.view.Board;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -9,28 +9,34 @@ import java.util.ArrayList;
 public class Environment {
 	private double sizeX;
 	private double sizeY;
-	private ArrayList<Agent> listeAgents;
+	private ArrayList<Agent> agentList;
 	
 	public Environment(double sizeX, double sizeY){	
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
-		this.listeAgents = new ArrayList<>();
+		this.agentList = new ArrayList<>();
 	}
 	
 	public Environment() {
 		this(500, 350);
 	}
-	
+
+    public String toString() {
+        return "[sizeX: " + this.getSizeX() +
+                " - sizeY: " + this.getSizeY() +
+                "]";
+    }
+
 	public void tick() {
-		for (Agent agent : this.listeAgents) {
+		for (Agent agent : this.agentList) {
             agent.changeRandDir();
-            agent.move(0.1d * Plateau.RESOLUTION);
+            agent.move(0.1d * Board.TIME_RESOLUTION);
 		}
 	}
 	
 	public void addAgent(Agent agent) {
-		agent.setEnvironement(this);
-		this.listeAgents.add(agent);
+		agent.setEnvironment(this);
+		this.agentList.add(agent);
 	}
 
 	public Position getCenter() {

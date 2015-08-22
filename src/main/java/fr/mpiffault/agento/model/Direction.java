@@ -2,40 +2,51 @@ package fr.mpiffault.agento.model;
 
 public class Direction {
     private double angle;
-    private static double SUD = Math.PI / 2d;
-    private static double EST = Math.PI;
-    private static double OUEST = Math.PI * 2d;
-    private static double NORD = SUD * 3d;
+    public static double SOUTH = Math.PI / 2d;
+    public static double EAST = Math.PI;
+    public static double WEST = Math.PI * 2d;
+    public static double NORTH = Math.PI * (3d / 2d);
 
     public Direction(double angle) {
-        this.angle = angle % (OUEST);
+        this.angle = angle % (WEST);
     }
 
     public Direction() {
-        this(NORD);
+        this(NORTH);
     }
 
     public Vector getVector() {
-        return new Vector(Math.cos(angle), Math.sin(angle));
-    };
+        double dx = veryLittleToZero(Math.cos(angle));
+        double dy = veryLittleToZero(Math.sin(angle));
+
+        return new Vector(dx, dy);
+    }
+
+    /*
+     Attempt to fix the results of Math.cos()/sin()
+     which should be 0 but are not
+     */
+    private double veryLittleToZero(double d) {
+        return Math.abs(d) < 1.0E-10 ? 0 : d;
+    }
 
     /**
-     * Ajoute l'angle dAngle en radian à cette Direction
-     * @param dAngle
+     * Adds angle dAngle in radians to this Direction
+     * @param dAngle angle to add in radian
      */
     public void addAngle(double dAngle) {
         this.setAngle(angle + dAngle);
     }
 
     /**
-     * Ajoute l'angle dAngle en degré à cette Direction
-     * @param dAngle
+     * Adds angle dAngle in degrees to this Direction
+     * @param dAngle angle to add in degrees
      */
-    public void addAngleDegre(double dAngle) {
-        addAngle((dAngle * EST) / 180d);
+    public void addAngleDegree(double dAngle) {
+        addAngle(Math.toRadians(dAngle));
     }
 
     public void setAngle (double angle) {
-        this.angle = angle % OUEST;
+        this.angle = angle % WEST;
     }
 }
