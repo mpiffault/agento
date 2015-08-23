@@ -2,10 +2,10 @@ package fr.mpiffault.agento.model.geometry;
 
 public class Direction {
     private double angle;
-    public static double SOUTH = Math.PI / 2d;
-    public static double EAST = Math.PI;
-    public static double WEST = Math.PI * 2d;
-    public static double NORTH = Math.PI * (3d / 2d);
+    public static final double SOUTH = Math.PI / 2d;
+    public static final double EAST = Math.PI;
+    public static final double WEST = Math.PI * 2d;
+    public static final double NORTH = Math.PI * (3d / 2d);
 
     public Direction(double angle) {
         this.angle = angle % (WEST);

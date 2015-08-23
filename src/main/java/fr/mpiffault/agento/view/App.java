@@ -11,12 +11,11 @@ public class App {
 		
 		JFrame frame = new JFrame("AgentO");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		Environment e = new Environment();
-		Agent a = new Agent(e);
-		
-		
-		Board board = new Board(e);
+		new Agent(e);
+
+        Board board = new Board(e);
 		
 		Thread t = new Thread(board);
 		

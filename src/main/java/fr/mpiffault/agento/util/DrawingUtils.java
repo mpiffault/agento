@@ -13,23 +13,23 @@ public class DrawingUtils {
      */
     public static Color intensityToColor(double intensityAsDouble, double maxValue) {
         intensityAsDouble = (intensityAsDouble / maxValue) * 1785;
-        int intensite = (int) intensityAsDouble;
-        if (intensite >= 1785) return Color.WHITE;
-        if (intensite <= 0) return Color.BLACK;
-        if (intensite < 255)
-            return new Color(0,0,intensite);
-        else if (intensite < 510)
-            return new Color(0, intensite%255, 255);
-        else if (intensite < 765)
-            return new Color(0, 255, 255 - intensite%255);
-        else if (intensite < 1020)
-            return new Color(intensite%255, 255, 0);
-        else if (intensite < 1275)
-            return new Color(255, 255 - intensite%255, 0);
-        else if (intensite < 1530)
-            return new Color(255, 0, intensite%255);
-        else if (intensite < 1785)
-            return new Color(255, intensite%255, 255);
+        int intensity = (int) intensityAsDouble;
+        if (intensity >= 1785) return Color.WHITE;
+        if (intensity <= 0) return Color.BLACK;
+        if (intensity < 255)
+            return new Color(0,0,intensity);
+        else if (intensity < 510)
+            return new Color(0, intensity%255, 255);
+        else if (intensity < 765)
+            return new Color(0, 255, 255 - intensity%255);
+        else if (intensity < 1020)
+            return new Color(intensity%255, 255, 0);
+        else if (intensity < 1275)
+            return new Color(255, 255 - intensity%255, 0);
+        else if (intensity < 1530)
+            return new Color(255, 0, intensity%255);
+        else if (intensity < 1785)
+            return new Color(255, intensity%255, 255);
         return Color.WHITE;
 
     }

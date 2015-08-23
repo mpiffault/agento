@@ -5,7 +5,7 @@ import fr.mpiffault.agento.model.geometry.Position;
 import junit.framework.TestCase;
 
 public class AgentTest extends TestCase {
-    Agent agent;
+    private Agent agent;
 
     public void setUp() throws Exception {
         super.setUp();

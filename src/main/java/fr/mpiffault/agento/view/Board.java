@@ -15,10 +15,10 @@ import java.util.LinkedList;
 public class Board extends JPanel implements Runnable {
 
     private static final long serialVersionUID = -8954030686627371948L;
-    public static long TIME_RESOLUTION = 30l;
+    public static final long TIME_RESOLUTION = 30l;
     @Getter
-    private final Environment environment;
-    private ArrayList<LinkedList<? extends Drawable>> layers;
+    private Environment environment;
+    private final ArrayList<LinkedList<? extends Drawable>> layers;
 
     Board(final Environment environment) {
         super();
@@ -41,7 +41,17 @@ public class Board extends JPanel implements Runnable {
 
         @Override
         public void mousePressed(MouseEvent e) {
-            c = new Agent(environment, new Position(e.getX(), e.getY()));
+            if (c != null) {
+                c.deselect();
+            }
+            Agent nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
+            if (nearest != null) {
+                c = nearest;
+                c.select();
+
+            } else {
+                c = new Agent(environment, new Position(e.getX(), e.getY()));
+            }
         }
 
         @Override

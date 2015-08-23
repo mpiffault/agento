@@ -13,7 +13,7 @@ import java.util.LinkedList;
 public class Environment implements Drawable{
 	private int sizeX;
 	private int sizeY;
-	private LinkedList<Agent> agentList;
+	private final LinkedList<Agent> agentList;
 	
 	public Environment(int sizeX, int sizeY){
 		this.sizeX = sizeX;
@@ -76,4 +76,13 @@ public class Environment implements Drawable{
         }
     }
 
+    public Agent getAgentAt(Position position) {
+        for (Agent agent : this.agentList) {
+            if (position.isNear(agent.getPosition(), 10)) {
+                return agent;
+            }
+        }
+
+        return null;
+    }
 }

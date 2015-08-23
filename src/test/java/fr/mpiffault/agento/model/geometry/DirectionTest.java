@@ -3,7 +3,7 @@ package fr.mpiffault.agento.model.geometry;
 import junit.framework.TestCase;
 
 public class DirectionTest extends TestCase {
-    Direction direction;
+    private Direction direction;
     public void setUp() throws Exception {
         super.setUp();
         direction = new Direction(Direction.NORTH);
