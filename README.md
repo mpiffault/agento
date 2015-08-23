@@ -9,5 +9,5 @@
   * Add some kind of IA (currently agents are just wandering around)
     * Field of vision
     * Decision making heuristic
-  * Make some herited types of agents
+  * Make some inherited types of agents
   * Add different kinds of entities

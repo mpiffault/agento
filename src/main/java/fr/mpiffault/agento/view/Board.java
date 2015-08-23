@@ -9,23 +9,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Board extends JPanel implements Runnable {
 
     private static final long serialVersionUID = -8954030686627371948L;
     public static long TIME_RESOLUTION = 30l;
+    @Getter
     private final Environment environment;
-    @Getter
-    private int sizeX;
-    @Getter
-    private int sizeY;
+    private ArrayList<LinkedList<? extends Drawable>> layers;
 
     Board(final Environment environment) {
         super();
+        this.layers = new ArrayList<>();
         setBackground(Color.WHITE);
         this.environment = environment;
-        this.sizeX = (int) this.environment.getSizeX();
-        this.sizeY = (int) this.environment.getSizeY();
+        LinkedList<Drawable> firstLayer = new LinkedList <>();
+        firstLayer.add(environment);
+        this.layers.add(0, firstLayer);
+        this.layers.add(1, environment.getAgentList());
 
         Mouse s = new Mouse();
         this.addMouseListener(s);
@@ -48,69 +51,32 @@ public class Board extends JPanel implements Runnable {
             }
         }
     }
+    public int getSizeX() {
+        return this.environment.getSizeX();
+    }
+
+    public int getSizeY() {
+        return this.environment.getSizeY();
+    }
 
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         super.paintComponent(g2);
-		// drawGradient(g2);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        drawAgents(g2);
-        g2.setColor(Color.RED);
-        g2.drawRect(0, 0, this.sizeX, this.sizeY);
-    }
 
-    public void drawAgents(Graphics2D g2) {
-        for (Drawable drawable : environment.getAgentList()) {
-            drawable.draw(g2);
-        }
-    }
-
-    public void drawGradient(Graphics2D g2) {
-        g2.setColor(Color.WHITE);
-        for (int iX = 0 ; iX < sizeX ; iX++) {
-            for (int iY = 0 ; iY < sizeY ; iY++) {
-                double intensite = environment.getGravityIntensityAt(iX, iY);
-                g2.setColor(intensiteToColor(intensite, 100));
-                g2.drawLine(iX, iY, iX, iY);
+        for (LinkedList<? extends Drawable> drawables : layers) {
+            for (Drawable drawable : drawables) {
+                drawable.draw(g2);
             }
         }
     }
 
-    /**
-     * Return a color according to intensity given between 0(BLACK) et 1785(WHITE) and a max value
-     * The color gradient sequence is Black=>Blue=>Cyan=>Green=>Yellow=>Red=>Pink=>White
-     * @param intensityAsDouble intensity. a negative value will return BLACK
-     * @param maxValue value beyond which it will be WHITE
-     * @return A Color between BLACK (0) and WHITE (maxValue)
-     */
-    public Color intensiteToColor(double intensityAsDouble, double maxValue) {
-        intensityAsDouble = (intensityAsDouble / maxValue) * 1785;
-        int intensite = (int) intensityAsDouble;
-        if (intensite >= 1785) return Color.WHITE;
-        if (intensite <= 0) return Color.BLACK;
-        if (intensite < 255)
-            return new Color(0,0,intensite);
-        else if (intensite < 510)
-            return new Color(0, intensite%255, 255);
-        else if (intensite < 765)
-            return new Color(0, 255, 255 - intensite%255);
-        else if (intensite < 1020)
-            return new Color(intensite%255, 255, 0);
-        else if (intensite < 1275)
-            return new Color(255, 255 - intensite%255, 0);
-        else if (intensite < 1530)
-            return new Color(255, 0, intensite%255);
-        else if (intensite < 1785)
-            return new Color(255, intensite%255, 255);
-        return Color.WHITE;
-
-    }
-
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         while(true) {
             try {
                 Thread.sleep(TIME_RESOLUTION);
-                environment.tick();
+                this.environment.tick();
                 this.repaint();
             } catch (Exception e) {
                 e.printStackTrace();

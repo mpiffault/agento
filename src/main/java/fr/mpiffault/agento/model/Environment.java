@@ -1,20 +1,23 @@
 package fr.mpiffault.agento.model;
 
+import fr.mpiffault.agento.util.DrawingUtils;
 import fr.mpiffault.agento.view.Board;
+import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;
 
-import java.util.ArrayList;
+import java.awt.*;
+import java.util.LinkedList;
 
 @Data
-public class Environment {
-	private double sizeX;
-	private double sizeY;
-	private ArrayList<Agent> agentList;
+public class Environment implements Drawable{
+	private int sizeX;
+	private int sizeY;
+	private LinkedList<Agent> agentList;
 	
-	public Environment(double sizeX, double sizeY){	
+	public Environment(int sizeX, int sizeY){
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
-		this.agentList = new ArrayList<>();
+		this.agentList = new LinkedList<>();
 	}
 	
 	public Environment() {
@@ -50,7 +53,26 @@ public class Environment {
                 && position.getY() <= sizeY;
     }
 
-    public double getGravityIntensityAt(int iX, int iY) {
+    private double getContinuousProperty(int iX, int iY) {
         return (iX*iY)/900d;
     }
+
+    @Override
+    public void draw(Graphics2D g2) {
+        g2.setColor(Color.RED);
+        g2.drawRect(0, 0, this.sizeX, this.sizeY);
+    }
+
+
+    private void drawGradient(Graphics2D g2) {
+        g2.setColor(Color.WHITE);
+        for (int iX = 0 ; iX < this.sizeX ; iX++) {
+            for (int iY = 0 ; iY < this.sizeY ; iY++) {
+                double intensity = this.getContinuousProperty(iX, iY);
+                g2.setColor(DrawingUtils.intensityToColor(intensity, 100));
+                g2.drawLine(iX, iY, iX, iY);
+            }
+        }
+    }
+
 }
