@@ -1,5 +1,6 @@
 package fr.mpiffault.agento.model;
 
+import fr.mpiffault.agento.model.geometry.Position;
 import fr.mpiffault.agento.util.DrawingUtils;
 import fr.mpiffault.agento.view.Board;
 import fr.mpiffault.agento.view.Drawable;

@@ -1,5 +1,7 @@
 package fr.mpiffault.agento.model;
 
+import fr.mpiffault.agento.model.geometry.Direction;
+import fr.mpiffault.agento.model.geometry.Position;
 import junit.framework.TestCase;
 
 public class AgentTest extends TestCase {

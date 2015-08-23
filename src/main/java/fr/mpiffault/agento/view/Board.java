@@ -2,7 +2,7 @@ package fr.mpiffault.agento.view;
 
 import fr.mpiffault.agento.model.Agent;
 import fr.mpiffault.agento.model.Environment;
-import fr.mpiffault.agento.model.Position;
+import fr.mpiffault.agento.model.geometry.Position;
 import lombok.Getter;
 
 import javax.swing.*;

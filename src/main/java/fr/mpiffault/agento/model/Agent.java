@@ -1,5 +1,8 @@
 package fr.mpiffault.agento.model;
 
+import fr.mpiffault.agento.model.geometry.Direction;
+import fr.mpiffault.agento.model.geometry.Position;
+import fr.mpiffault.agento.model.geometry.Vector;
 import fr.mpiffault.agento.view.Board;
 import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;

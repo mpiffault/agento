@@ -1,4 +1,4 @@
-package fr.mpiffault.agento.model;
+package fr.mpiffault.agento.model.geometry;
 
 public class Direction {
     private double angle;
