@@ -8,14 +8,20 @@ import lombok.Data;
 
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.Set;
 
 @Data
 public class Environment implements Drawable{
-	private int sizeX;
+    public static final int LEFT = 37;
+    public static final int UP = 38;
+    public static final int RIGHT = 39;
+    public static final int DOWN = 40;
+    private int sizeX;
 	private int sizeY;
 	private final LinkedList<Agent> agentList;
-	
-	public Environment(int sizeX, int sizeY){
+    private Set<Integer> keysPressed;
+
+    public Environment(int sizeX, int sizeY){
 		this.sizeX = sizeX;
 		this.sizeY = sizeY;
 		this.agentList = new LinkedList<>();
@@ -33,8 +39,23 @@ public class Environment implements Drawable{
 
 	public void tick() {
 		for (Agent agent : this.agentList) {
-            agent.changeRandDir();
-            agent.move(0.1d * Board.TIME_RESOLUTION);
+            if (!agent.isSelected()) {
+                agent.changeRandDir();
+                agent.move(0.1d * Board.TIME_RESOLUTION);
+            } else {
+                if (keysPressed.contains(LEFT)) {
+                    agent.getDirection().addAngleDegree(-5);
+                }
+                if (keysPressed.contains(UP)) {
+                    agent.move(0.1d * Board.TIME_RESOLUTION);
+                }
+                if (keysPressed.contains(RIGHT)) {
+                    agent.getDirection().addAngleDegree(5);
+                }
+                if (keysPressed.contains(DOWN)) {
+                    agent.move(-0.1d * Board.TIME_RESOLUTION);
+                }
+            }
 		}
 	}
 	
@@ -84,5 +105,9 @@ public class Environment implements Drawable{
         }
 
         return null;
+    }
+
+    public void setKeysPressed(Set<Integer> keysPressed) {
+        this.keysPressed = keysPressed;
     }
 }

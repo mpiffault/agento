@@ -7,10 +7,8 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.awt.event.*;
+import java.util.*;
 
 public class Board extends JPanel implements Runnable {
 
@@ -19,54 +17,83 @@ public class Board extends JPanel implements Runnable {
     @Getter
     private Environment environment;
     private final ArrayList<LinkedList<? extends Drawable>> layers;
+    private Agent selectedAgent;
+    private Set<Integer> keysPressed;
 
     Board(final Environment environment) {
         super();
         this.layers = new ArrayList<>();
+        this.keysPressed = new HashSet<>();
         setBackground(Color.WHITE);
         this.environment = environment;
+        environment.setKeysPressed(keysPressed);
         LinkedList<Drawable> firstLayer = new LinkedList <>();
         firstLayer.add(environment);
         this.layers.add(0, firstLayer);
         this.layers.add(1, environment.getAgentList());
 
-        Mouse s = new Mouse();
-        this.addMouseListener(s);
-		this.addMouseMotionListener(s);
+        EventListener mouseHandler = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                System.out.println("Test : " + e.paramString());
+                boolean agentDeselected = deselectAgent();
+                Agent nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
+                if (nearest != null) {
+                    selectAgent(nearest);
+                } else if(!agentDeselected) {
+                    new Agent(environment, new Position(e.getX(), e.getY()));
+                }
+            }
+
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (selectedAgent != null) {
+                    selectedAgent.setPosition(new Position(e.getX(), e.getY()));
+                }
+            }
+        };
+
+        this.addMouseListener((MouseListener) mouseHandler);
+		this.addMouseMotionListener((MouseMotionListener) mouseHandler);
+
+        KeyListener keyHandler = new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                keysPressed.add(e.getKeyCode());
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                keysPressed.remove(e.getKeyCode());
+            }
+        };
+        this.setFocusable(true);
+        this.addKeyListener(keyHandler);
 
     }
 
-    private class Mouse extends MouseAdapter {
-        Agent c;
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            if (c != null) {
-                c.deselect();
-            }
-            Agent nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
-            if (nearest != null) {
-                c = nearest;
-                c.select();
-
-            } else {
-                c = new Agent(environment, new Position(e.getX(), e.getY()));
-            }
-        }
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            if (c != null) {
-                c.setPosition(new Position(e.getX(), e.getY()));
-            }
-        }
-    }
     public int getSizeX() {
         return this.environment.getSizeX();
     }
 
     public int getSizeY() {
         return this.environment.getSizeY();
+    }
+
+    private void selectAgent(Agent agent) {
+        if (agent != null) {
+            agent.select();
+        }
+        this.selectedAgent = agent;
+    }
+
+    private boolean deselectAgent() {
+        if (this.selectedAgent != null) {
+            this.selectedAgent.deselect();
+            this.selectedAgent = null;
+            return true;
+        }
+        return false;
     }
 
     public void paintComponent(Graphics g) {
@@ -79,6 +106,11 @@ public class Board extends JPanel implements Runnable {
                 drawable.draw(g2);
             }
         }
+    }
+
+    @Override
+    protected void printComponent(Graphics g) {
+        super.printComponent(g);
     }
 
     @SuppressWarnings("InfiniteLoopStatement")

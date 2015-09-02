@@ -45,6 +45,7 @@ public class Agent implements Drawable {
     }
 
     public void move(double speed) {
+
         Vector d = direction.getVector();
         double newX = position.getX() + d.getDx() * speed;
         double newY = position.getY() + d.getDy() * speed;
