@@ -12,14 +12,11 @@ import java.util.Set;
 
 @Data
 public class Environment implements Drawable{
-    public static final int LEFT = 37;
-    public static final int UP = 38;
-    public static final int RIGHT = 39;
-    public static final int DOWN = 40;
     private int sizeX;
 	private int sizeY;
 	private final LinkedList<Agent> agentList;
     private Set<Integer> keysPressed;
+    private boolean fullTrace;
 
     public Environment(int sizeX, int sizeY){
 		this.sizeX = sizeX;
@@ -39,22 +36,11 @@ public class Environment implements Drawable{
 
 	public void tick() {
 		for (Agent agent : this.agentList) {
-            if (!agent.isSelected()) {
+            if (agent.isFree()) {
                 agent.changeRandDir();
                 agent.move(0.1d * Board.TIME_RESOLUTION);
             } else {
-                if (keysPressed.contains(LEFT)) {
-                    agent.getDirection().addAngleDegree(-5);
-                }
-                if (keysPressed.contains(UP)) {
-                    agent.move(0.1d * Board.TIME_RESOLUTION);
-                }
-                if (keysPressed.contains(RIGHT)) {
-                    agent.getDirection().addAngleDegree(5);
-                }
-                if (keysPressed.contains(DOWN)) {
-                    agent.move(-0.1d * Board.TIME_RESOLUTION);
-                }
+                agent.moveAccordingToKeys(keysPressed);
             }
 		}
 	}

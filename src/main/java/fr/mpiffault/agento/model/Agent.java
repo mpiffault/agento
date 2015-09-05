@@ -10,22 +10,34 @@ import lombok.Data;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Data
 public class Agent implements Drawable {
+
+    public static final int LEFT = 37;
+    public static final int UP = 38;
+    public static final int RIGHT = 39;
+    public static final int DOWN = 40;
 
     private static final double BODY_SIZE = 5d;
     private Environment environment;
     private Position position;
     private boolean selected;
+    private boolean trace;
     private Direction direction;
+    private List<Position> path;
 
     private static final Random RAND = new Random();
+    private boolean free;
 
     public Agent(Environment environment) {
         this.environment = environment;
         this.selected = false;
+        this.free = true;
         environment.addAgent(this);
         position = environment.getCenter();
         direction = new Direction();
@@ -53,6 +65,18 @@ public class Agent implements Drawable {
         newX = torify(newX, environment.getSizeX());
         newY = torify(newY, environment.getSizeY());
 
+        if (trace) {
+            Position nouvellePosition = new Position(newX, newY);
+            if (path != null) {
+                if (!path.isEmpty()) {
+                    if (!nouvellePosition.isNear(path.get(path.size()-1), 5.0)) {
+                        path.add(nouvellePosition);
+                    }
+                } else {
+                    path.add(nouvellePosition);
+                }
+            }
+        }
         position.setX(newX);
         position.setY(newY);
 
@@ -75,11 +99,23 @@ public class Agent implements Drawable {
     @Override
     public void draw(Graphics2D g2) {
         g2.setColor(Color.RED);
-        Line2D.Double line = new Line2D.Double(this.getPosition().getX() % environment.getSizeX(),
-                this.getPosition().getY() % environment.getSizeY(),
-                this.getPosition().getX() % environment.getSizeX() + (this.getDirection().getVector().getDx() * 5),
-                this.getPosition().getY() % environment.getSizeY() + (this.getDirection().getVector().getDy() * 5));
+        Line2D.Double line = new Line2D.Double(this.getPosition().getX(),
+                this.getPosition().getY(),
+                this.getPosition().getX() + (this.getDirection().getVector().getDx() * 5),
+                this.getPosition().getY() + (this.getDirection().getVector().getDy() * 5));
         g2.draw(line);
+        if(trace) {
+            if (path != null && !path.isEmpty()) {
+                Position p1 = path.get(0);
+                for (Position p2 : path) {
+                    if (p1.squareDistanceTo(p2) < 40d) {
+                        Line2D.Double linePath = new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+                        g2.draw(linePath);
+                    }
+                    p1 = p2;
+                }
+            }
+        }
         if (selected) {
             Shape selectShape = new Ellipse2D.Double(this.getPosition().getX() - Agent.BODY_SIZE,this.getPosition().getY() - Agent.BODY_SIZE,  Agent.BODY_SIZE * 2d,  Agent.BODY_SIZE * 2d);
             g2.setColor(new Color(0, 255, 255, 100));
@@ -93,9 +129,39 @@ public class Agent implements Drawable {
 
     public void select() {
         this.selected = true;
+        this.free = false;
     }
 
     public void deselect() {
         this.selected = false;
+        this.free = true;
+    }
+
+    public void unTrace() {
+        this.trace = false;
+        if (path != null) {
+            this.path.clear();
+        }
+        this.path = null;
+    }
+
+    public void trace() {
+        this.trace = true;
+        this.path = new ArrayList<>();
+    }
+
+    public void moveAccordingToKeys(Set<Integer> keysPressed) {
+        if (keysPressed.contains(LEFT)) {
+            direction.addAngleDegree(-5);
+        }
+        if (keysPressed.contains(UP)) {
+            move(0.1d * Board.TIME_RESOLUTION);
+        }
+        if (keysPressed.contains(RIGHT)) {
+            direction.addAngleDegree(5);
+        }
+        if (keysPressed.contains(DOWN)) {
+            move(-0.1d * Board.TIME_RESOLUTION);
+        }
     }
 }

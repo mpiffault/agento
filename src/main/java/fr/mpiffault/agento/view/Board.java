@@ -41,7 +41,7 @@ public class Board extends JPanel implements Runnable {
                 if (nearest != null) {
                     selectAgent(nearest);
                 } else if(!agentDeselected) {
-                    new Agent(environment, new Position(e.getX(), e.getY()));
+                    Agent a = new Agent(environment, new Position(e.getX(), e.getY()));
                 }
             }
 
@@ -60,6 +60,31 @@ public class Board extends JPanel implements Runnable {
             @Override
             public void keyPressed(KeyEvent e) {
                 keysPressed.add(e.getKeyCode());
+            }
+
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == 'f') {
+                    selectedAgent.setFree(!selectedAgent.isFree());
+                } else if (e.getKeyChar() == 't') {
+                    if (selectedAgent.isTrace()) {
+                        selectedAgent.unTrace();
+                    } else {
+                        selectedAgent.trace();
+                    }
+                } else if (e.getKeyChar() == 'T') {
+                    if (environment.isFullTrace()) {
+                        environment.setFullTrace(false);
+                        for (Agent a : environment.getAgentList()) {
+                            a.unTrace();
+                        }
+                    } else {
+                        environment.setFullTrace(true);
+                        for (Agent a : environment.getAgentList()) {
+                            a.trace();
+                        }
+                    }
+                }
             }
 
             @Override
