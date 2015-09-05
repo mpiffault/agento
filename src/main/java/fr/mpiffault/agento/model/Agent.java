@@ -6,6 +6,7 @@ import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.util.Random;
@@ -13,11 +14,6 @@ import java.util.Set;
 
 @Data
 public class Agent implements Drawable, Selectable, Traceable, Controllable {
-
-    public static final int LEFT = 37;
-    public static final int UP = 38;
-    public static final int RIGHT = 39;
-    public static final int DOWN = 40;
 
     private static final double BODY_SIZE = 5d;
     private Environment environment;
@@ -92,6 +88,7 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
                 this.getPosition().getX() + (this.getDirection().getVector().getDx() * 5),
                 this.getPosition().getY() + (this.getDirection().getVector().getDy() * 5));
         g2.draw(line);
+
         if(trace) {
             path.draw(g2);
         }
@@ -132,16 +129,16 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     @Override
     public void moveAccordingToKeys(Set<Integer> keysPressed) {
-        if (keysPressed.contains(LEFT)) {
+        if (keysPressed.contains(KeyEvent.VK_LEFT)) {
             direction.addAngleDegree(-5);
         }
-        if (keysPressed.contains(UP)) {
+        if (keysPressed.contains(KeyEvent.VK_UP)) {
             move(0.1d * Board.TIME_RESOLUTION);
         }
-        if (keysPressed.contains(RIGHT)) {
+        if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
             direction.addAngleDegree(5);
         }
-        if (keysPressed.contains(DOWN)) {
+        if (keysPressed.contains(KeyEvent.VK_DOWN)) {
             move(-0.1d * Board.TIME_RESOLUTION);
         }
     }

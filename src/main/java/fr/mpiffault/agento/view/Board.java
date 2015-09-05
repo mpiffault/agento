@@ -1,13 +1,18 @@
 package fr.mpiffault.agento.view;
 
-import fr.mpiffault.agento.model.*;
-import fr.mpiffault.agento.model.geometry.Position;
+import fr.mpiffault.agento.control.KeyboardHandler;
+import fr.mpiffault.agento.control.MouseHandler;
+import fr.mpiffault.agento.model.Controllable;
+import fr.mpiffault.agento.model.Environment;
+import fr.mpiffault.agento.model.Selectable;
 import fr.mpiffault.agento.model.geometry.Traceable;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.*;
 
 public class Board extends JPanel implements Runnable {
@@ -17,82 +22,32 @@ public class Board extends JPanel implements Runnable {
     @Getter
     private Environment environment;
     private final ArrayList<LinkedList<? extends Drawable>> layers;
+    @Getter
     private Selectable selectedEntity;
+    @Getter
     private Set<Integer> keysPressed;
 
     Board(final Environment environment) {
         super();
-        this.layers = new ArrayList<>();
-        this.keysPressed = new HashSet<>();
         setBackground(Color.WHITE);
+
         this.environment = environment;
-        environment.setKeysPressed(keysPressed);
+        this.keysPressed = new HashSet<>();
+        this.environment.setKeysPressed(keysPressed);
+
+        this.layers = new ArrayList<>();
         LinkedList<Drawable> firstLayer = new LinkedList <>();
         firstLayer.add(environment);
         this.layers.add(0, firstLayer);
         this.layers.add(1, environment.getAgentList());
 
-        EventListener mouseHandler = new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                boolean entityDeselected = deselectEntity();
-                Selectable nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
-                if (nearest != null) {
-                    selectEntity(nearest);
-                } else if(!entityDeselected) {
-                    Agent a = new Agent(environment, new Position(e.getX(), e.getY()));
-                }
-            }
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (selectedEntity != null && selectedEntity instanceof Draggable) {
-                    ((Draggable)selectedEntity).setPosition(new Position(e.getX(), e.getY()));
-                }
-            }
-        };
-
+        EventListener mouseHandler = new MouseHandler(this);
         this.addMouseListener((MouseListener) mouseHandler);
 		this.addMouseMotionListener((MouseMotionListener) mouseHandler);
 
-        KeyListener keyHandler = new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                keysPressed.add(e.getKeyCode());
-            }
-
-            @Override
-            public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == 'f' && selectedEntity instanceof Controllable) {
-                    ((Controllable)selectedEntity).setFree(!((Controllable)selectedEntity).isFree());
-                } else if (e.getKeyChar() == 't' && selectedEntity instanceof Traceable) {
-                    if (((Traceable)selectedEntity).isTrace()) {
-                        ((Traceable)selectedEntity).unTrace();
-                    } else {
-                        ((Traceable)selectedEntity).trace();
-                    }
-                } else if (e.getKeyChar() == 'T') {
-                    if (environment.isFullTrace()) {
-                        environment.setFullTrace(false);
-                        for (Traceable t : environment.getAgentList()) {
-                            t.unTrace();
-                        }
-                    } else {
-                        environment.setFullTrace(true);
-                        for (Traceable t : environment.getAgentList()) {
-                            t.trace();
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void keyReleased(KeyEvent e) {
-                keysPressed.remove(e.getKeyCode());
-            }
-        };
+        KeyListener keyboardHandler = new KeyboardHandler(this);
         this.setFocusable(true);
-        this.addKeyListener(keyHandler);
+        this.addKeyListener(keyboardHandler);
 
     }
 
@@ -104,14 +59,14 @@ public class Board extends JPanel implements Runnable {
         return this.environment.getSizeY();
     }
 
-    private void selectEntity(Selectable selectable) {
+    public void selectEntity(Selectable selectable) {
         if (selectable != null) {
             selectable.select();
         }
         this.selectedEntity = selectable;
     }
 
-    private boolean deselectEntity() {
+    public boolean deselectEntity() {
         if (this.selectedEntity != null) {
             this.selectedEntity.deselect();
             this.selectedEntity = null;
@@ -130,6 +85,44 @@ public class Board extends JPanel implements Runnable {
                 drawable.draw(g2);
             }
         }
+    }
+
+    public void toggleFreeSelected() {
+        if (selectedEntity instanceof Controllable) {
+            ((Controllable) selectedEntity).setFree(!((Controllable) selectedEntity).isFree());
+        }
+    }
+
+    public void toggleFullTrace() {
+        if (environment.isFullTrace()) {
+            environment.setFullTrace(false);
+            for (Traceable t : environment.getAgentList()) {
+                t.unTrace();
+            }
+        } else {
+            environment.setFullTrace(true);
+            for (Traceable t : environment.getAgentList()) {
+                t.trace();
+            }
+        }
+    }
+
+    public void toggleSelectedTrace() {
+        if (selectedEntity instanceof Traceable) {
+            if (((Traceable) selectedEntity).isTrace()) {
+                ((Traceable) selectedEntity).unTrace();
+            } else {
+                ((Traceable) selectedEntity).trace();
+            }
+        }
+    }
+
+    public void addControlKey(int keyCode) {
+        keysPressed.add(keyCode);
+    }
+
+    public void removeControlKey(int keyCode) {
+        keysPressed.remove(keyCode);
     }
 
     @Override
