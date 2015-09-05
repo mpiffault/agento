@@ -1,8 +1,8 @@
 package fr.mpiffault.agento.view;
 
-import fr.mpiffault.agento.model.Agent;
-import fr.mpiffault.agento.model.Environment;
+import fr.mpiffault.agento.model.*;
 import fr.mpiffault.agento.model.geometry.Position;
+import fr.mpiffault.agento.model.geometry.Traceable;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ public class Board extends JPanel implements Runnable {
     @Getter
     private Environment environment;
     private final ArrayList<LinkedList<? extends Drawable>> layers;
-    private Agent selectedAgent;
+    private Selectable selectedEntity;
     private Set<Integer> keysPressed;
 
     Board(final Environment environment) {
@@ -35,20 +35,19 @@ public class Board extends JPanel implements Runnable {
         EventListener mouseHandler = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("Test : " + e.paramString());
-                boolean agentDeselected = deselectAgent();
-                Agent nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
+                boolean entityDeselected = deselectEntity();
+                Selectable nearest = environment.getAgentAt(new Position(e.getX(), e.getY()));
                 if (nearest != null) {
-                    selectAgent(nearest);
-                } else if(!agentDeselected) {
+                    selectEntity(nearest);
+                } else if(!entityDeselected) {
                     Agent a = new Agent(environment, new Position(e.getX(), e.getY()));
                 }
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (selectedAgent != null) {
-                    selectedAgent.setPosition(new Position(e.getX(), e.getY()));
+                if (selectedEntity != null && selectedEntity instanceof Draggable) {
+                    ((Draggable)selectedEntity).setPosition(new Position(e.getX(), e.getY()));
                 }
             }
         };
@@ -64,24 +63,24 @@ public class Board extends JPanel implements Runnable {
 
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == 'f') {
-                    selectedAgent.setFree(!selectedAgent.isFree());
-                } else if (e.getKeyChar() == 't') {
-                    if (selectedAgent.isTrace()) {
-                        selectedAgent.unTrace();
+                if (e.getKeyChar() == 'f' && selectedEntity instanceof Controllable) {
+                    ((Controllable)selectedEntity).setFree(!((Controllable)selectedEntity).isFree());
+                } else if (e.getKeyChar() == 't' && selectedEntity instanceof Traceable) {
+                    if (((Traceable)selectedEntity).isTrace()) {
+                        ((Traceable)selectedEntity).unTrace();
                     } else {
-                        selectedAgent.trace();
+                        ((Traceable)selectedEntity).trace();
                     }
                 } else if (e.getKeyChar() == 'T') {
                     if (environment.isFullTrace()) {
                         environment.setFullTrace(false);
-                        for (Agent a : environment.getAgentList()) {
-                            a.unTrace();
+                        for (Traceable t : environment.getAgentList()) {
+                            t.unTrace();
                         }
                     } else {
                         environment.setFullTrace(true);
-                        for (Agent a : environment.getAgentList()) {
-                            a.trace();
+                        for (Traceable t : environment.getAgentList()) {
+                            t.trace();
                         }
                     }
                 }
@@ -105,17 +104,17 @@ public class Board extends JPanel implements Runnable {
         return this.environment.getSizeY();
     }
 
-    private void selectAgent(Agent agent) {
-        if (agent != null) {
-            agent.select();
+    private void selectEntity(Selectable selectable) {
+        if (selectable != null) {
+            selectable.select();
         }
-        this.selectedAgent = agent;
+        this.selectedEntity = selectable;
     }
 
-    private boolean deselectAgent() {
-        if (this.selectedAgent != null) {
-            this.selectedAgent.deselect();
-            this.selectedAgent = null;
+    private boolean deselectEntity() {
+        if (this.selectedEntity != null) {
+            this.selectedEntity.deselect();
+            this.selectedEntity = null;
             return true;
         }
         return false;

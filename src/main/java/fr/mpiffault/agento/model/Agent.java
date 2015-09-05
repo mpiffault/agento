@@ -1,8 +1,6 @@
 package fr.mpiffault.agento.model;
 
-import fr.mpiffault.agento.model.geometry.Direction;
-import fr.mpiffault.agento.model.geometry.Position;
-import fr.mpiffault.agento.model.geometry.Vector;
+import fr.mpiffault.agento.model.geometry.*;
 import fr.mpiffault.agento.view.Board;
 import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;
@@ -10,13 +8,11 @@ import lombok.Data;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 @Data
-public class Agent implements Drawable {
+public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     public static final int LEFT = 37;
     public static final int UP = 38;
@@ -29,7 +25,7 @@ public class Agent implements Drawable {
     private boolean selected;
     private boolean trace;
     private Direction direction;
-    private List<Position> path;
+    private Path path;
 
     private static final Random RAND = new Random();
     private boolean free;
@@ -65,21 +61,13 @@ public class Agent implements Drawable {
         newX = torify(newX, environment.getSizeX());
         newY = torify(newY, environment.getSizeY());
 
+        Position newPosition = new Position(newX, newY);
         if (trace) {
-            Position nouvellePosition = new Position(newX, newY);
-            if (path != null) {
-                if (!path.isEmpty()) {
-                    if (!nouvellePosition.isNear(path.get(path.size()-1), 5.0)) {
-                        path.add(nouvellePosition);
-                    }
-                } else {
-                    path.add(nouvellePosition);
-                }
+            if (path.getLastPosition() == null || !newPosition.isNear(path.getLastPosition(), 5.0)) {
+                path.add(newPosition);
             }
         }
-        position.setX(newX);
-        position.setY(newY);
-
+        position = newPosition;
     }
 
     private double torify(double coordinate, double maxCoordinate) {
@@ -105,16 +93,7 @@ public class Agent implements Drawable {
                 this.getPosition().getY() + (this.getDirection().getVector().getDy() * 5));
         g2.draw(line);
         if(trace) {
-            if (path != null && !path.isEmpty()) {
-                Position p1 = path.get(0);
-                for (Position p2 : path) {
-                    if (p1.squareDistanceTo(p2) < 40d) {
-                        Line2D.Double linePath = new Line2D.Double(p1.getX(), p1.getY(), p2.getX(), p2.getY());
-                        g2.draw(linePath);
-                    }
-                    p1 = p2;
-                }
-            }
+            path.draw(g2);
         }
         if (selected) {
             Shape selectShape = new Ellipse2D.Double(this.getPosition().getX() - Agent.BODY_SIZE,this.getPosition().getY() - Agent.BODY_SIZE,  Agent.BODY_SIZE * 2d,  Agent.BODY_SIZE * 2d);
@@ -127,29 +106,31 @@ public class Agent implements Drawable {
         g2.fill(body);
     }
 
+    @Override
     public void select() {
         this.selected = true;
         this.free = false;
     }
 
+    @Override
     public void deselect() {
         this.selected = false;
         this.free = true;
     }
 
+    @Override
     public void unTrace() {
         this.trace = false;
-        if (path != null) {
-            this.path.clear();
-        }
         this.path = null;
     }
 
+    @Override
     public void trace() {
         this.trace = true;
-        this.path = new ArrayList<>();
+        this.path = new Path();
     }
 
+    @Override
     public void moveAccordingToKeys(Set<Integer> keysPressed) {
         if (keysPressed.contains(LEFT)) {
             direction.addAngleDegree(-5);

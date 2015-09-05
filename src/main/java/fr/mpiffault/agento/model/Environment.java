@@ -35,19 +35,23 @@ public class Environment implements Drawable{
     }
 
 	public void tick() {
-		for (Agent agent : this.agentList) {
-            if (agent.isFree()) {
-                agent.changeRandDir();
-                agent.move(0.1d * Board.TIME_RESOLUTION);
-            } else {
-                agent.moveAccordingToKeys(keysPressed);
+        synchronized (this.agentList) {
+            for (Agent agent : this.agentList) {
+                if (agent.isFree()) {
+                    agent.changeRandDir();
+                    agent.move(0.1d * Board.TIME_RESOLUTION);
+                } else {
+                    agent.moveAccordingToKeys(keysPressed);
+                }
             }
-		}
+        }
 	}
 	
 	public void addAgent(Agent agent) {
 		agent.setEnvironment(this);
-		this.agentList.add(agent);
+        synchronized (this.agentList) {
+            this.agentList.add(agent);
+        }
 	}
 
 	public Position getCenter() {
@@ -84,12 +88,13 @@ public class Environment implements Drawable{
     }
 
     public Agent getAgentAt(Position position) {
-        for (Agent agent : this.agentList) {
-            if (position.isNear(agent.getPosition(), 10)) {
-                return agent;
+        synchronized (this.agentList) {
+            for (Agent agent : this.agentList) {
+                if (position.isNear(agent.getPosition(), 10)) {
+                    return agent;
+                }
             }
         }
-
         return null;
     }
 

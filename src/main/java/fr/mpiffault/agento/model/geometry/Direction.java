@@ -16,18 +16,19 @@ public class Direction {
     }
 
     public Vector getVector() {
-        double dx = veryLittleToZero(Math.cos(angle));
-        double dy = veryLittleToZero(Math.sin(angle));
-
-        return new Vector(dx, dy);
-    }
-
-    /*
-     Attempt to fix the results of Math.cos()/sin()
-     which should be 0 but are not
-     */
-    private double veryLittleToZero(double d) {
-        return Math.abs(d) < 1.0E-10 ? 0 : d;
+        if (this.angle == SOUTH) {
+            return new Vector(0d, 1d);
+        }
+        if (this.angle == EAST) {
+            return new Vector(-1d, 0d);
+        }
+        if (this.angle == WEST) {
+            return new Vector(1d, 0d);
+        }
+        if (this.angle == NORTH) {
+            return new Vector(0d, -1d);
+        }
+        return new Vector(Math.cos(angle), Math.sin(angle));
     }
 
     /**
