@@ -16,6 +16,7 @@ import java.util.Set;
 public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     private static final double BODY_SIZE = 5d;
+    private static final double SELECT_SIZE = 10d;
     private Environment environment;
     private Position position;
     private boolean selected;
@@ -48,24 +49,6 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         this.direction = new Direction(angle);
     }
 
-    public void move(double speed) {
-
-        Vector d = direction.getVector();
-        double newX = position.getX() + d.getDx() * speed;
-        double newY = position.getY() + d.getDy() * speed;
-
-        newX = torify(newX, environment.getSizeX());
-        newY = torify(newY, environment.getSizeY());
-
-        Position newPosition = new Position(newX, newY);
-        if (trace) {
-            if (path.getLastPosition() == null || !newPosition.isNear(path.getLastPosition(), 5.0)) {
-                path.add(newPosition);
-            }
-        }
-        position = newPosition;
-    }
-
     private double torify(double coordinate, double maxCoordinate) {
         if (coordinate < 0) {
             coordinate  += maxCoordinate;
@@ -75,32 +58,84 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         return coordinate;
     }
 
-    public void changeRandDir() {
+    @Override
+    public void move() {
+        if (free) {
+            changeRandDir();
+            step(3d);
+        } else {
+            moveAccordingToKeys(environment.getKeysPressed());
+        }
+    }
+
+    public void step(double speed) {
+        Vector d = direction.getVector();
+        double newX = position.getX() + d.getDx() * speed;
+        double newY = position.getY() + d.getDy() * speed;
+
+        newX = torify(newX, environment.getSizeX());
+        newY = torify(newY, environment.getSizeY());
+
+        Position newPosition = new Position(newX, newY);
+        if (trace) {
+            if (path.getLastPosition() == null || !newPosition.isNear(path.getLastPosition(), 5d)) {
+                path.add(newPosition);
+            }
+        }
+        position = newPosition;
+    }
+
+    private void changeRandDir() {
         double dDir = (RAND.nextBoolean() ? 1d : -1d) * (0.33d * Board.TIME_RESOLUTION);
         direction.addAngleDegree(dDir);
     }
 
+    private void moveAccordingToKeys(Set<Integer> keysPressed) {
+        double angleToAdd = 0d;
+        double speedToStep = 0d;
+        if (keysPressed.contains(KeyEvent.VK_LEFT)) {
+            angleToAdd -= 5d;
+        }
+        if (keysPressed.contains(KeyEvent.VK_UP)) {
+            speedToStep += 3d;
+        }
+        if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
+            angleToAdd += 5d;
+        }
+        if (keysPressed.contains(KeyEvent.VK_DOWN)) {
+            speedToStep -= 3d;
+        }
+        direction.addAngleDegree(angleToAdd);
+        step(speedToStep);
+    }
+
     @Override
-    public void draw(Graphics2D g2) {
-        g2.setColor(Color.RED);
-        Line2D.Double line = new Line2D.Double(this.getPosition().getX(),
-                this.getPosition().getY(),
-                this.getPosition().getX() + (this.getDirection().getVector().getDx() * 5),
-                this.getPosition().getY() + (this.getDirection().getVector().getDy() * 5));
-        g2.draw(line);
+    public void draw(Graphics2D g2, Position mousePosition) {
+        g2.setColor(Board.RED);
 
         if(trace) {
-            path.draw(g2);
+            path.draw(g2, mousePosition);
         }
         if (selected) {
-            Shape selectShape = new Ellipse2D.Double(this.getPosition().getX() - Agent.BODY_SIZE,this.getPosition().getY() - Agent.BODY_SIZE,  Agent.BODY_SIZE * 2d,  Agent.BODY_SIZE * 2d);
-            g2.setColor(new Color(0, 255, 255, 100));
+            Shape selectShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
+            g2.setColor(Board.BLUE);
             g2.fill(selectShape);
         }
-        g2.setColor(Color.ORANGE);
-        Shape body = new Ellipse2D.Double(this.getPosition().getX() - (Agent.BODY_SIZE / 2d),this.getPosition().getY() - (Agent.BODY_SIZE / 2d),  Agent.BODY_SIZE,  Agent.BODY_SIZE);
+        if (this.position.isNear(mousePosition, 10d)) {
+            Shape hoverShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
+            g2.setColor(Board.PINK);
+            g2.draw(hoverShape);
+        }
+        g2.setColor(Board.YELLOW);
+        Shape body = new Ellipse2D.Double(position.getX() - (BODY_SIZE / 2d), position.getY() - (BODY_SIZE / 2d),  BODY_SIZE,  BODY_SIZE);
         g2.draw(body);
         g2.fill(body);
+        g2.setColor(Board.RED);
+        Line2D.Double line = new Line2D.Double(position.getX(),
+                position.getY(),
+                position.getX() + (direction.getVector().getDx() * 5),
+                position.getY() + (direction.getVector().getDy() * 5));
+        g2.draw(line);
     }
 
     @Override
@@ -125,21 +160,5 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
     public void trace() {
         this.trace = true;
         this.path = new Path();
-    }
-
-    @Override
-    public void moveAccordingToKeys(Set<Integer> keysPressed) {
-        if (keysPressed.contains(KeyEvent.VK_LEFT)) {
-            direction.addAngleDegree(-5);
-        }
-        if (keysPressed.contains(KeyEvent.VK_UP)) {
-            move(0.1d * Board.TIME_RESOLUTION);
-        }
-        if (keysPressed.contains(KeyEvent.VK_RIGHT)) {
-            direction.addAngleDegree(5);
-        }
-        if (keysPressed.contains(KeyEvent.VK_DOWN)) {
-            move(-0.1d * Board.TIME_RESOLUTION);
-        }
     }
 }

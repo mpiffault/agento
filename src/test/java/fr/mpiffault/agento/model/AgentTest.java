@@ -17,7 +17,7 @@ public class AgentTest extends TestCase {
         agent.setDirection(Direction.NORTH);
         assertEquals(0d, agent.getPosition().getX(), 0.001d);
         assertEquals(0d, agent.getPosition().getY(), 0.001d);
-        agent.move(2d);
+        agent.step(2d);
         assertEquals(0d, agent.getPosition().getX(), 0.001d);
         assertEquals(agent.getEnvironment().getSizeY() - 2d, agent.getPosition().getY(), 0.001d);
     }

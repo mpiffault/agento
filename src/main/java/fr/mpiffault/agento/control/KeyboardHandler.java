@@ -18,22 +18,19 @@ public class KeyboardHandler extends KeyAdapter {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (controlKeys.contains(e.getKeyCode())) {
-            board.addControlKey(e.getKeyCode());
-        } else {
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_F:
-                    this.board.toggleFreeSelected();
-                    break;
-                case KeyEvent.VK_T:
-                    if (e.isShiftDown()) {
-                        this.board.toggleFullTrace();
-                    } else {
-                        this.board.toggleSelectedTrace();
-                    }
-                    break;
-                default:
-            }
+        board.addControlKey(e.getKeyCode());
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_F:
+                this.board.toggleFreeSelected();
+                break;
+            case KeyEvent.VK_T:
+                if (e.isShiftDown()) {
+                    this.board.toggleTraceAll();
+                } else {
+                    this.board.toggleTraceSelected();
+                }
+                break;
+            default:
         }
     }
 

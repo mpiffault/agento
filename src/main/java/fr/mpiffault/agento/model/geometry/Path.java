@@ -22,7 +22,7 @@ public class Path implements Drawable{
     }
 
     @Override
-    public void draw(Graphics2D g2) {
+    public void draw(Graphics2D g2, Position mousePosition) {
         synchronized (path) {
             for (Line2D line : path) {
                 g2.draw(line);

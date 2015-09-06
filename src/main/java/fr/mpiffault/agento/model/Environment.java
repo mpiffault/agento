@@ -2,7 +2,6 @@ package fr.mpiffault.agento.model;
 
 import fr.mpiffault.agento.model.geometry.Position;
 import fr.mpiffault.agento.util.DrawingUtils;
-import fr.mpiffault.agento.view.Board;
 import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;
 
@@ -37,12 +36,7 @@ public class Environment implements Drawable{
 	public void tick() {
         synchronized (this.agentList) {
             for (Agent agent : this.agentList) {
-                if (agent.isFree()) {
-                    agent.changeRandDir();
-                    agent.move(0.1d * Board.TIME_RESOLUTION);
-                } else {
-                    agent.moveAccordingToKeys(keysPressed);
-                }
+                agent.move();
             }
         }
 	}
@@ -70,7 +64,7 @@ public class Environment implements Drawable{
     }
 
     @Override
-    public void draw(Graphics2D g2) {
+    public void draw(Graphics2D g2, Position mousePosition) {
         g2.setColor(Color.RED);
         g2.drawRect(0, 0, this.sizeX, this.sizeY);
     }
@@ -90,7 +84,7 @@ public class Environment implements Drawable{
     public Agent getAgentAt(Position position) {
         synchronized (this.agentList) {
             for (Agent agent : this.agentList) {
-                if (position.isNear(agent.getPosition(), 10)) {
+                if (position.isNear(agent.getPosition(), 10d)) {
                     return agent;
                 }
             }

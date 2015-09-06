@@ -5,12 +5,12 @@ import fr.mpiffault.agento.control.MouseHandler;
 import fr.mpiffault.agento.model.Controllable;
 import fr.mpiffault.agento.model.Environment;
 import fr.mpiffault.agento.model.Selectable;
+import fr.mpiffault.agento.model.geometry.Position;
 import fr.mpiffault.agento.model.geometry.Traceable;
 import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.*;
@@ -26,6 +26,11 @@ public class Board extends JPanel implements Runnable {
     private Selectable selectedEntity;
     @Getter
     private Set<Integer> keysPressed;
+
+    public static final Color BLUE = new Color(137, 188, 197, 150);
+    public static final Color PINK = new Color(230, 130, 139, 255);
+    public static final Color RED = new Color(159, 64, 72, 255);
+    public static final Color YELLOW = new Color(227, 171, 72, 255);
 
     Board(final Environment environment) {
         super();
@@ -45,9 +50,8 @@ public class Board extends JPanel implements Runnable {
         this.addMouseListener((MouseListener) mouseHandler);
 		this.addMouseMotionListener((MouseMotionListener) mouseHandler);
 
-        KeyListener keyboardHandler = new KeyboardHandler(this);
         this.setFocusable(true);
-        this.addKeyListener(keyboardHandler);
+        this.addKeyListener(new KeyboardHandler(this));
 
     }
 
@@ -79,10 +83,16 @@ public class Board extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
         super.paintComponent(g2);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+        Point mousePoint = getMousePosition();
+        Position mousePosition;
+        if (mousePoint != null) {
+            mousePosition = new Position(mousePoint.getX(), mousePoint.getY());
+        } else {
+            mousePosition = new Position();
+        }
         for (LinkedList<? extends Drawable> drawables : layers) {
             for (Drawable drawable : drawables) {
-                drawable.draw(g2);
+                drawable.draw(g2, mousePosition);
             }
         }
     }
@@ -93,7 +103,7 @@ public class Board extends JPanel implements Runnable {
         }
     }
 
-    public void toggleFullTrace() {
+    public void toggleTraceAll() {
         if (environment.isFullTrace()) {
             environment.setFullTrace(false);
             for (Traceable t : environment.getAgentList()) {
@@ -107,7 +117,7 @@ public class Board extends JPanel implements Runnable {
         }
     }
 
-    public void toggleSelectedTrace() {
+    public void toggleTraceSelected() {
         if (selectedEntity instanceof Traceable) {
             if (((Traceable) selectedEntity).isTrace()) {
                 ((Traceable) selectedEntity).unTrace();

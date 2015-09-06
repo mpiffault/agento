@@ -12,6 +12,11 @@ public class Position {
         this.y = y;
     }
 
+    public Position() {
+        this.x = 0d;
+        this.y = 0d;
+    }
+
     public String toString() {
         return "(x:" + x +
                 "/y:" + y +
