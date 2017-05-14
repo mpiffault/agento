@@ -79,6 +79,7 @@ public class Board extends JPanel implements Runnable {
         return false;
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         super.paintComponent(g2);

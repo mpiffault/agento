@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 @Data
-public class Environment implements Drawable{
+public class Environment implements Drawable {
     private int sizeX;
 	private int sizeY;
 	private final LinkedList<Agent> agentList;

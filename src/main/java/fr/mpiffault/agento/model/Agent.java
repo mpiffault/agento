@@ -9,8 +9,11 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 public class Agent implements Drawable, Selectable, Traceable, Controllable {
@@ -117,9 +120,7 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
             path.draw(g2, mousePosition);
         }
         if (selected) {
-            Shape selectShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
-            g2.setColor(Board.BLUE);
-            g2.fill(selectShape);
+            drawSelected(g2);
         }
         if (this.position.isNear(mousePosition, 10d)) {
             Shape hoverShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
@@ -131,11 +132,42 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         g2.draw(body);
         g2.fill(body);
         g2.setColor(Board.RED);
-        Line2D.Double line = new Line2D.Double(position.getX(),
-                position.getY(),
-                position.getX() + (direction.getVector().getDx() * 5),
-                position.getY() + (direction.getVector().getDy() * 5));
+        Line2D.Double line = getDirectionLine();
         g2.draw(line);
+
+        new Line(this.position, getNearest().position).draw(g2, mousePosition);
+    }
+
+    private Line2D.Double getDirectionLine() {
+        return new Line2D.Double(position.getX(),
+                    position.getY(),
+                    position.getX() + (direction.getVector().getDx() * 5),
+                    position.getY() + (direction.getVector().getDy() * 5));
+    }
+
+    private void drawSelected(Graphics2D g2) {
+        Shape selectShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
+        g2.setColor(Board.BLUE);
+        g2.fill(selectShape);
+    }
+
+    private Agent getNearest() {
+        if (this.environment.getAgentList().size() <= 1) {
+            return this;
+        }
+        List<Agent> filtered = this.environment.getAgentList().stream()
+                .filter(a -> a != this)
+                .collect(Collectors.toList());
+        Agent nearest = null;
+        double minDistance = Double.MAX_VALUE;
+        for (Agent a : filtered) {
+            double dist = a.position.squareDistanceTo(this.position);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearest = a;
+            }
+        }
+        return nearest;
     }
 
     @Override
