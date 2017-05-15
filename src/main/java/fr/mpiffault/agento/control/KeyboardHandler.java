@@ -30,6 +30,13 @@ public class KeyboardHandler extends KeyAdapter {
                     this.board.toggleTraceSelected();
                 }
                 break;
+            case KeyEvent.VK_M:
+                if (e.isShiftDown()) {
+                    this.board.toggleModeAll();
+                } else {
+                    this.board.toggleModeSelected();
+                }
+                break;
             default:
         }
     }

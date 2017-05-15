@@ -1,6 +1,7 @@
 package fr.mpiffault.agento.model;
 
 import fr.mpiffault.agento.model.geometry.*;
+import fr.mpiffault.agento.util.ColorUtils;
 import fr.mpiffault.agento.view.Board;
 import fr.mpiffault.agento.view.Drawable;
 import lombok.Data;
@@ -9,7 +10,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -29,6 +29,8 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     private static final Random RAND = new Random();
     private boolean free;
+    private Mode mode;
+    private Color color;
 
     public Agent(Environment environment) {
         this.environment = environment;
@@ -37,11 +39,14 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         environment.addAgent(this);
         position = environment.getCenter();
         direction = new Direction();
+        mode = Mode.RANDOM;
+        color = ColorUtils.randomColor();
     }
 
     public Agent(Environment environment, Position position) {
         this(environment);
         this.position = position;
+        color = ColorUtils.randomColor();
     }
 
     public String toString() {
@@ -54,9 +59,9 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     private double torify(double coordinate, double maxCoordinate) {
         if (coordinate < 0) {
-            coordinate  += maxCoordinate;
-        } else if (coordinate  > maxCoordinate) {
-            coordinate  -= maxCoordinate;
+            coordinate += maxCoordinate;
+        } else if (coordinate > maxCoordinate) {
+            coordinate -= maxCoordinate;
         }
         return coordinate;
     }
@@ -64,7 +69,16 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
     @Override
     public void move() {
         if (free) {
-            changeRandDir();
+            switch (mode) {
+                case RANDOM:
+                    changeRandDir();
+                    break;
+                case FOLLOW_NEAREST:
+                    followNearest();
+                    break;
+                default:
+                    break;
+            }
             step(3d);
         } else {
             moveAccordingToKeys(environment.getKeysPressed());
@@ -93,6 +107,11 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         direction.addAngleDegree(dDir);
     }
 
+    private void followNearest() {
+        Agent nearest = getNearest();
+        direction.setAngle(Math.atan2(this.position.getX() - nearest.position.getX(), this.position.getY() - nearest.position.getY()));
+    }
+
     private void moveAccordingToKeys(Set<Integer> keysPressed) {
         double angleToAdd = 0d;
         double speedToStep = 0d;
@@ -114,39 +133,40 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     @Override
     public void draw(Graphics2D g2, Position mousePosition) {
-        g2.setColor(Board.RED);
 
-        if(trace) {
+        if (trace) {
+            g2.setColor(color);
             path.draw(g2, mousePosition);
         }
         if (selected) {
             drawSelected(g2);
         }
         if (this.position.isNear(mousePosition, 10d)) {
-            Shape hoverShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
+            Shape hoverShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE, SELECT_SIZE, SELECT_SIZE);
             g2.setColor(Board.PINK);
             g2.draw(hoverShape);
         }
-        g2.setColor(Board.YELLOW);
-        Shape body = new Ellipse2D.Double(position.getX() - (BODY_SIZE / 2d), position.getY() - (BODY_SIZE / 2d),  BODY_SIZE,  BODY_SIZE);
+        g2.setColor(this.color);
+        Shape body = new Ellipse2D.Double(position.getX() - (BODY_SIZE / 2d), position.getY() - (BODY_SIZE / 2d), BODY_SIZE, BODY_SIZE);
         g2.draw(body);
         g2.fill(body);
         g2.setColor(Board.RED);
         Line2D.Double line = getDirectionLine();
         g2.draw(line);
 
+        g2.setColor(this.color);
         new Line(this.position, getNearest().position).draw(g2, mousePosition);
     }
 
     private Line2D.Double getDirectionLine() {
         return new Line2D.Double(position.getX(),
-                    position.getY(),
-                    position.getX() + (direction.getVector().getDx() * 5),
-                    position.getY() + (direction.getVector().getDy() * 5));
+                position.getY(),
+                position.getX() + (direction.getVector().getDx() * 5),
+                position.getY() + (direction.getVector().getDy() * 5));
     }
 
     private void drawSelected(Graphics2D g2) {
-        Shape selectShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE,  SELECT_SIZE,  SELECT_SIZE);
+        Shape selectShape = new Ellipse2D.Double(position.getX() - BODY_SIZE, position.getY() - BODY_SIZE, SELECT_SIZE, SELECT_SIZE);
         g2.setColor(Board.BLUE);
         g2.fill(selectShape);
     }
@@ -192,5 +212,9 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
     public void trace() {
         this.trace = true;
         this.path = new Path();
+    }
+
+    public void toggleMode() {
+        mode = Mode.nextMode(mode);
     }
 }

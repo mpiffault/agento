@@ -24,7 +24,7 @@ public class Environment implements Drawable {
 	}
 	
 	public Environment() {
-		this(500, 350);
+		this(1000, 700);
 	}
 
     public String toString() {

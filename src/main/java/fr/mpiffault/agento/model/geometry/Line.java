@@ -15,7 +15,6 @@ public class Line implements Drawable{
 
     @Override
     public void draw(Graphics2D g2, Position mousePosition) {
-        g2.setColor(Color.RED);
         g2.draw(line);
     }
 }

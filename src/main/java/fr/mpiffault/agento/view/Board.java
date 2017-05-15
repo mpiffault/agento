@@ -2,9 +2,7 @@ package fr.mpiffault.agento.view;
 
 import fr.mpiffault.agento.control.KeyboardHandler;
 import fr.mpiffault.agento.control.MouseHandler;
-import fr.mpiffault.agento.model.Controllable;
-import fr.mpiffault.agento.model.Environment;
-import fr.mpiffault.agento.model.Selectable;
+import fr.mpiffault.agento.model.*;
 import fr.mpiffault.agento.model.geometry.Position;
 import fr.mpiffault.agento.model.geometry.Traceable;
 import lombok.Getter;
@@ -14,6 +12,8 @@ import java.awt.*;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.*;
+
+import static fr.mpiffault.agento.model.Mode.RANDOM;
 
 public class Board extends JPanel implements Runnable {
 
@@ -26,6 +26,8 @@ public class Board extends JPanel implements Runnable {
     private Selectable selectedEntity;
     @Getter
     private Set<Integer> keysPressed;
+
+    private Mode currentMode = RANDOM;
 
     public static final Color BLUE = new Color(137, 188, 197, 150);
     public static final Color PINK = new Color(230, 130, 139, 255);
@@ -151,6 +153,17 @@ public class Board extends JPanel implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void toggleModeAll() {
+        currentMode = Mode.nextMode(currentMode);
+        environment.getAgentList().forEach(agent -> agent.setMode(currentMode));
+    }
+
+    public void toggleModeSelected() {
+        if (selectedEntity instanceof Agent) {
+            ((Agent)selectedEntity).toggleMode();
         }
     }
 }
