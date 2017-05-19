@@ -109,7 +109,7 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
 
     private void followNearest() {
         Agent nearest = getNearest();
-        direction.setAngle(Math.atan2(this.position.getX() - nearest.position.getX(), this.position.getY() - nearest.position.getY()));
+        direction.setAngle(Math.atan2(this.position.getX() - nearest.position.getX(), this.position.getY() - nearest.position.getY()) + Direction.SOUTH);
     }
 
     private void moveAccordingToKeys(Set<Integer> keysPressed) {
@@ -181,13 +181,60 @@ public class Agent implements Drawable, Selectable, Traceable, Controllable {
         Agent nearest = null;
         double minDistance = Double.MAX_VALUE;
         for (Agent a : filtered) {
-            double dist = a.position.squareDistanceTo(this.position);
+            //double dist = a.position.squareDistanceTo(this.position);
+            double dist = this.getToroidalDistanceTo(this);
             if (dist < minDistance) {
                 minDistance = dist;
                 nearest = a;
             }
         }
         return nearest;
+    }
+
+    /*
+        +---------------------------------------+
+        |(0,0)          |                       |(X,0)
+        |      B        |                 B     |
+        |     X-        |               -X      |
+        |     |    1    |A(this)    3    |      |
+        +---------------X-----------------------+
+        |               |                       |
+        |               |                       |
+        |               |                       |
+        |          2    |           4           |
+        |     |B        |                |B     |
+        |     X-        |               -X      |
+        |               |                       |
+        +---------------------------------------+
+         (0,Y)                                   (X,Y)
+     */
+    private double getToroidalDistanceTo(Agent other) {
+        double halfSizeX = environment.getSizeX() / 2;
+        double halfSizeY = environment.getSizeY() / 2;
+        double otherX = other.position.getX();
+        double otherY = other.position.getY();
+        double halfDiagonalLength = Math.sqrt((environment.getSizeX() * environment.getSizeX()) + (environment.getSizeY() * environment.getSizeY()));
+
+        Position enclosingRectangleCenter;
+        if (this.position.getX() > other.position.getX()) {
+            if (this.position.getY() > this.position.getY()) {
+                // first quarter
+                enclosingRectangleCenter = new Position(otherX + halfSizeX, otherY + halfSizeY);
+            } else {
+                // second quarter
+                enclosingRectangleCenter = new Position(otherX + halfSizeX, otherY - halfSizeY);
+            }
+        } else {
+            if (this.position.getY() > this.position.getY()) {
+                // third quarter
+                enclosingRectangleCenter = new Position(otherX - halfSizeX, otherY + halfSizeY);
+            } else {
+                // fourth quarter
+                enclosingRectangleCenter = new Position(otherX - halfSizeX, otherY - halfSizeY);
+            }
+        }
+
+        return Math.abs(Math.sqrt(this.position.squareDistanceTo(enclosingRectangleCenter)) - halfDiagonalLength);
     }
 
     @Override
